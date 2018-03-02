@@ -22,7 +22,7 @@ export default class MenuBar extends React.Component{
 
         let menu =[];
         let loginMess;
-        console.log("loggedIn", sessionStorage.getItem("loggedIn"))
+
         if(!sessionStorage.getItem("loggedIn")){
             menu.push(<li key={1}><Link to="/">Home</Link></li>);
             menu.push(<li key={2}><Link to="/Login">Login</Link></li>);

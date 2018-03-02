@@ -38,7 +38,6 @@ passport.use(
         consumerSecret: keys.twitter.clientSecret,
         callbackURL: '/auth/twitter/redirect'
     }, (token, tokenSecret, profile, done) => {
-        console.log(profile)
         // check if user already exists in our own db
         getUser(profile.id, profile.displayName, profile._json.profile_image_url, done);
 
@@ -55,7 +54,6 @@ function getUser(profile_id, profile_displayName, profile_json_image_url, done){
 
         if (docs.length != 0) {
             // already have this user
-            console.log('user is: ', docs[0].userId);
             done(null, docs[0].userId);
         } else {
             // if not, create user in our db
@@ -65,7 +63,6 @@ function getUser(profile_id, profile_displayName, profile_json_image_url, done){
                 thumbnail: profile_json_image_url,
                 pics: []
             }, function (err, r) {
-                console.log('created new user: ', profile_id);
                 done(null, profile_id);
             });
         }

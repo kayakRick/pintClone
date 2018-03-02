@@ -13742,8 +13742,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react_router__ = __webpack_require__(34);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__MenuBar__ = __webpack_require__(243);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__home__ = __webpack_require__(244);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__myPics__ = __webpack_require__(245);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__login__ = __webpack_require__(247);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__myPics__ = __webpack_require__(246);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__login__ = __webpack_require__(249);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__getBaseUrl__ = __webpack_require__(72);
 /********************************************************************************************************
  * This is the main container for the pintClone app.
@@ -13789,14 +13789,12 @@ class App extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
             if (this.httpRequest.readyState === XMLHttpRequest.DONE) {
                 if (this.httpRequest.status === 200) {
                     let resp = JSON.parse(this.httpRequest.responseText);
-                    console.log(resp);
 
                     if (resp.status == "logged in") {
                         sessionStorage.setItem('loggedIn', true);
                         sessionStorage.setItem('userId', resp.userId);
                         sessionStorage.setItem('userName', resp.userName);
                     } else {
-                        console.log("not logged in");
                         sessionStorage.removeItem('loggedIn');
                         sessionStorage.removeItem('userId');
                         sessionStorage.removeItem('userName');
@@ -27207,7 +27205,7 @@ class MenuBar extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
 
         let menu = [];
         let loginMess;
-        console.log("loggedIn", sessionStorage.getItem("loggedIn"));
+
         if (!sessionStorage.getItem("loggedIn")) {
             menu.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'li',
@@ -27322,6 +27320,8 @@ class MenuBar extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react_router__ = __webpack_require__(34);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__getBaseUrl__ = __webpack_require__(72);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__home_picRow__ = __webpack_require__(245);
+
 
 
 
@@ -27331,10 +27331,96 @@ class MenuBar extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
 class Home extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
     constructor(props) {
         super(props);
+
+        this.state = {
+            pics: []
+        };
+
+        this.getPicsCB = this.getPicsCB.bind(this);
+        this.onLikePicClick = this.onLikePicClick.bind(this);
+        this.onLikePicClickCB = this.onLikePicClickCB.bind(this);
+        this.picsURL = Object(__WEBPACK_IMPORTED_MODULE_2__getBaseUrl__["a" /* default */])() + "svc/allPics";
+        this.likeURL = Object(__WEBPACK_IMPORTED_MODULE_2__getBaseUrl__["a" /* default */])() + "svc/likePic";
+
+        this.getPics();
+    }
+
+    getPics() {
+        this.httpRequest = new XMLHttpRequest();
+        this.httpRequest.onreadystatechange = this.getPicsCB;
+        this.httpRequest.open("GET", this.picsURL);
+        this.httpRequest.send();
+    }
+
+    getPicsCB() {
+        try {
+            if (this.httpRequest.readyState === XMLHttpRequest.DONE) {
+                if (this.httpRequest.status === 200) {
+                    let resp = JSON.parse(this.httpRequest.responseText);
+
+                    if (resp.message == "") {
+                        this.setState({ pics: resp.pics });
+                    } else {
+                        bootbox.alert(resp.message);
+                    }
+                } else {
+                    bootbox.alert("Get Pics Request Failed -- Response Code = " + this.httpRequest.status);
+                }
+            }
+        } catch (e) {
+            bootbox.alert("Caught Exception: " + e.message);
+        }
+    }
+
+    onLikePicClick(e) {
+        this.httpRequest = new XMLHttpRequest();
+        this.httpRequest.onreadystatechange = this.onLikePicClickCB;
+        this.httpRequest.open("POST", this.likeURL);
+        this.httpRequest.setRequestHeader("Content-Type", "application/json");
+        let getReq = {
+            userId: this.state.pics[e.target.value].userId,
+            picUrl: this.state.pics[e.target.value].url,
+            picNum: e.target.value
+        };
+        this.httpRequest.send(JSON.stringify(getReq));
+    }
+
+    onLikePicClickCB() {
+        try {
+            if (this.httpRequest.readyState === XMLHttpRequest.DONE) {
+                if (this.httpRequest.status === 200) {
+                    let resp = JSON.parse(this.httpRequest.responseText);
+
+                    if (resp.message == "") {
+
+                        let pics = this.state.pics;
+                        pics[resp.picNum].likes = resp.likes;
+                        this.setState({
+                            pics: pics
+                        });
+                    } else {
+                        bootbox.alert(resp.message);
+                    }
+                } else {
+                    bootbox.alert("Like Pic Request Failed -- Response Code = " + this.httpRequest.status);
+                }
+            }
+        } catch (e) {
+            bootbox.alert("Caught Exception: " + e.message);
+        }
     }
 
     render() {
-        return null;
+        let rows = [];
+
+        for (let i = 0, key = 0; i < this.state.pics.length; i += 3, key++) rows.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__home_picRow__["a" /* default */], { pics: this.state.pics, i: i, key: key,
+            onLikeclick: this.onLikePicClick }));
+
+        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            'div',
+            { className: 'container' },
+            rows
+        );
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Home;
@@ -27347,9 +27433,109 @@ class Home extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+
+
+class BarRow extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            "div",
+            { className: "container" },
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                "div",
+                { className: "row" },
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(PicCell, { pics: this.props.pics, i: this.props.i,
+                    onLikeclick: this.props.onLikeclick }),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(PicCell, { pics: this.props.pics, i: this.props.i + 1,
+                    onLikeclick: this.props.onLikeclick }),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(PicCell, { pics: this.props.pics, i: this.props.i + 2,
+                    onLikeclick: this.props.onLikeclick })
+            )
+        );
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = BarRow;
+
+
+class PicCell extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    addDefaultSrc(ev) {
+        ev.target.src = '../images/placeholder.png';
+    }
+
+    render() {
+
+        const imgStyle = {
+            width: '128px',
+            marginBottom: "10px"
+        };
+
+        let i = this.props.i;
+        let pics = this.props.pics;
+
+        if (i >= pics.length) return null;
+
+        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            "div",
+            { className: "col-md-4" },
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                "div",
+                { className: "thumbnail pic" },
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "div",
+                    { className: "text-center" },
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "h5",
+                        null,
+                        " ",
+                        pics[i].desc
+                    )
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("img", { onError: this.addDefaultSrc, src: pics[i].url, style: imgStyle }),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "div",
+                    { className: "text-center" },
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(Deletebutton, { onLikeclick: this.props.onLikeclick, i: i, likes: pics[i].likes })
+                )
+            )
+        );
+    }
+}
+
+class Deletebutton extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        if (localStorage.getItem("loggedIn")) return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            "button",
+            { className: "btn btn-primary", type: "button",
+                value: this.props.i, onClick: this.props.onLikeclick },
+            "Likes: " + this.props.likes,
+            " "
+        );else return null;
+    }
+}
+
+/***/ }),
+/* 246 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react_router__ = __webpack_require__(34);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__getBaseUrl__ = __webpack_require__(72);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__myPics_centerCol__ = __webpack_require__(246);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__myPics_centerCol__ = __webpack_require__(247);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__myPics_picRow__ = __webpack_require__(248);
+
 
 
 
@@ -27374,8 +27560,10 @@ class MyPics extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
         this.onAddClickCB = this.onAddClickCB.bind(this);
         this.onAddFormChange = this.onAddFormChange.bind(this);
         this.onDeletePicClick = this.onDeletePicClick.bind(this);
+        this.onDeletePicClickCB = this.onDeletePicClickCB.bind(this);
 
         this.picsURL = Object(__WEBPACK_IMPORTED_MODULE_2__getBaseUrl__["a" /* default */])() + "svc/pics";
+        this.deletePicURL = Object(__WEBPACK_IMPORTED_MODULE_2__getBaseUrl__["a" /* default */])() + "svc/deletePic";
 
         this.getPics();
     }
@@ -27392,7 +27580,6 @@ class MyPics extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
             if (this.httpRequest.readyState === XMLHttpRequest.DONE) {
                 if (this.httpRequest.status === 200) {
                     let resp = JSON.parse(this.httpRequest.responseText);
-                    console.log(resp);
 
                     if (resp.message == "") {
                         this.setState({ pics: resp.pics });
@@ -27418,7 +27605,6 @@ class MyPics extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
             addPicDesc: this.state.addPicDesc
         };
         this.httpRequest.send(JSON.stringify(getReq));
-        console.log("posted: ", getReq);
     }
 
     onAddClickCB() {
@@ -27454,9 +27640,48 @@ class MyPics extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
         this.setState(ste);
     }
 
-    onDeletePicClick() {}
+    onDeletePicClick(e) {
+        this.httpRequest = new XMLHttpRequest();
+        this.httpRequest.onreadystatechange = this.onDeletePicClickCB;
+        this.httpRequest.open("POST", this.deletePicURL);
+        this.httpRequest.setRequestHeader("Content-Type", "application/json");
+        let deleteReq = { picNum: e.target.value };
+        this.httpRequest.send(JSON.stringify(deleteReq));
+    }
+
+    onDeletePicClickCB() {
+        try {
+            if (this.httpRequest.readyState === XMLHttpRequest.DONE) {
+                if (this.httpRequest.status === 200) {
+                    let resp = JSON.parse(this.httpRequest.responseText);
+
+                    if (resp.message == "") {
+                        let pics = this.state.pics;
+                        let newPics = [];
+
+                        for (let i = 0; i < pics.length; i++) {
+                            if (i != resp.picNum) newPics.push(pics[i]);
+                        }
+                        bootbox.alert("Picture deleted from your collection");
+                        this.setState({ pics: newPics });
+                    } else {
+                        bootbox.alert(resp.message);
+                    }
+                } else {
+                    bootbox.alert("Delete Picture Request Failed -- Response Code = " + this.httpRequest.status);
+                }
+            }
+        } catch (e) {
+            bootbox.alert("Caught Exception: " + e.message);
+        }
+    }
 
     render() {
+        let rows = [];
+
+        for (let i = 0, key = 0; i < this.state.pics.length; i += 3, key++) rows.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__myPics_picRow__["a" /* default */], { pics: this.state.pics, i: i, key: key,
+            onDeleteclick: this.onDeletePicClick }));
+
         return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             'div',
             { className: 'container' },
@@ -27470,10 +27695,11 @@ class MyPics extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
                         addPicDesc: this.state.addPicDesc,
                         onAddClick: this.onAddClick,
                         onFormChange: this.onAddFormChange,
-                        onDeletePicClick: this.onDeletePicClick,
-                        pics: this.state.pics })
+                        onDeletePicClick: this.onDeletePicClick
+                    })
                 )
-            )
+            ),
+            rows
         );
     }
 }
@@ -27481,7 +27707,7 @@ class MyPics extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
 
 
 /***/ }),
-/* 246 */
+/* 247 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27491,48 +27717,6 @@ class MyPics extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
 
 
 
-class DisplayPic extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        let id = this.props.id;
-
-        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-            "div",
-            null,
-            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                "div",
-                { className: "outline" },
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    "div",
-                    { className: "row" },
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        "div",
-                        { className: "col-md-2" },
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("img", { src: this.props.pics[id].url, width: "20%" })
-                    )
-                ),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    "div",
-                    { className: "text-center" },
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        "div",
-                        { className: "btn-group", role: "group", "aria-label": "..." },
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                            "button",
-                            { type: "button", className: "btn btn-danger", id: id,
-                                onClick: this.props.onDeletePicClick },
-                            "Delete Pic"
-                        )
-                    )
-                )
-            )
-        );
-    }
-}
-
 class CenterCol extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
     constructor(props) {
         super(props);
@@ -27540,14 +27724,6 @@ class CenterCol extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component 
 
     render() {
         let submitState = this.props.addPicURL == "" || this.props.addPicDesc == "" ? "disabled" : "";
-        let displayPics = [];
-
-        for (let i = 0; i < this.props.pics.length; i++) {
-            displayPics.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DisplayPic, { key: i,
-                pics: this.props.pics,
-                onDeletePicClick: this.props.onDeletePicClick,
-                id: i }));
-        }
 
         return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             "div",
@@ -27601,8 +27777,7 @@ class CenterCol extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component 
                         )
                     )
                 )
-            ),
-            displayPics
+            )
         );
     }
 }
@@ -27610,7 +27785,104 @@ class CenterCol extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component 
 
 
 /***/ }),
-/* 247 */
+/* 248 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+
+
+class BarRow extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            "div",
+            { className: "container" },
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                "div",
+                { className: "row" },
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(PicCell, { pics: this.props.pics, i: this.props.i,
+                    onDeleteclick: this.props.onDeleteclick }),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(PicCell, { pics: this.props.pics, i: this.props.i + 1,
+                    onDeleteclick: this.props.onDeleteclick }),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(PicCell, { pics: this.props.pics, i: this.props.i + 2,
+                    onDeleteclick: this.props.onDeleteclick })
+            )
+        );
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = BarRow;
+
+
+class PicCell extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    addDefaultSrc(ev) {
+        ev.target.src = '../images/placeholder.png';
+    }
+
+    render() {
+
+        const imgStyle = {
+            width: '128px',
+            marginBottom: "10px"
+        };
+
+        let i = this.props.i;
+        let pics = this.props.pics;
+
+        if (i >= pics.length) return null;
+
+        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            "div",
+            { className: "col-md-4" },
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                "div",
+                { className: "thumbnail pic" },
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "div",
+                    { className: "text-center" },
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "h5",
+                        null,
+                        " ",
+                        pics[i].desc
+                    )
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("img", { onError: this.addDefaultSrc, src: pics[i].url, style: imgStyle }),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "div",
+                    { className: "text-center" },
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(Deletebutton, { onDeleteclick: this.props.onDeleteclick, i: i })
+                )
+            )
+        );
+    }
+}
+
+class Deletebutton extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        if (localStorage.getItem("loggedIn")) return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            "button",
+            { className: "btn btn-primary", type: "button",
+                value: this.props.i, onClick: this.props.onDeleteclick },
+            "Delete"
+        );else return null;
+    }
+}
+
+/***/ }),
+/* 249 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

@@ -8,7 +8,8 @@ import  { Router,
     Link } from 'react-router';
 
 import getBaseUrl from "./getBaseUrl";
-import CenterCol from "./myPics/centerCol"
+import CenterCol from "./myPics/centerCol";
+import PicRow from "./myPics/picRow";
 
 export default class MyPics extends React.Component {
     constructor(props) {
@@ -28,8 +29,10 @@ export default class MyPics extends React.Component {
         this.onAddClickCB = this.onAddClickCB.bind(this);
         this.onAddFormChange = this.onAddFormChange.bind(this);
         this.onDeletePicClick = this.onDeletePicClick.bind(this);
+        this.onDeletePicClickCB = this.onDeletePicClickCB.bind(this);
 
         this.picsURL = getBaseUrl() + "svc/pics";
+        this.deletePicURL = getBaseUrl() + "svc/deletePic";
 
         this.getPics();
 
@@ -47,7 +50,6 @@ export default class MyPics extends React.Component {
             if (this.httpRequest.readyState === XMLHttpRequest.DONE) {
                 if (this.httpRequest.status === 200) {
                     let resp = JSON.parse(this.httpRequest.responseText);
-                    console.log(resp)
 
                     if(resp.message == "") {
                         this.setState({pics: resp.pics});
@@ -74,7 +76,6 @@ export default class MyPics extends React.Component {
             addPicDesc: this.state.addPicDesc
         };
         this.httpRequest.send(JSON.stringify(getReq));
-        console.log("posted: ", getReq)
     }
 
     onAddClickCB(){
@@ -112,11 +113,51 @@ export default class MyPics extends React.Component {
         this.setState(ste);
     }
 
-    onDeletePicClick(){
+    onDeletePicClick(e){
+        this.httpRequest = new XMLHttpRequest();
+        this.httpRequest.onreadystatechange = this.onDeletePicClickCB;
+        this.httpRequest.open("POST", this.deletePicURL);
+        this.httpRequest.setRequestHeader("Content-Type", "application/json");
+        let deleteReq = {picNum: e.target.value};
+        this.httpRequest.send(JSON.stringify(deleteReq));
+    }
 
+    onDeletePicClickCB() {
+        try {
+            if (this.httpRequest.readyState === XMLHttpRequest.DONE) {
+                if (this.httpRequest.status === 200) {
+                    let resp = JSON.parse(this.httpRequest.responseText);
+
+                    if (resp.message == "") {
+                        let pics = this.state.pics;
+                        let newPics = [];
+
+                        for (let i = 0; i < pics.length; i++) {
+                            if (i != resp.picNum)
+                                newPics.push(pics[i]);
+                        }
+                        bootbox.alert("Picture deleted from your collection");
+                        this.setState({pics: newPics});
+                    } else {
+                        bootbox.alert(resp.message);
+                    }
+                } else {
+                    bootbox.alert("Delete Picture Request Failed -- Response Code = " + this.httpRequest.status);
+                }
+            }
+        }
+        catch (e) {
+            bootbox.alert("Caught Exception: " + e.message);
+        }
     }
 
     render(){
+        let rows = [];
+
+        for(let i = 0, key = 0; i < this.state.pics.length; i += 3, key++)
+            rows.push( <PicRow pics={this.state.pics} i={i} key={key}
+                                onDeleteclick={this.onDeletePicClick}/>);
+
         return (<div className="container">
                 <div className="row">
                     <div className="col-md-12">
@@ -125,9 +166,10 @@ export default class MyPics extends React.Component {
                                    onAddClick={this.onAddClick}
                                    onFormChange={this.onAddFormChange}
                                    onDeletePicClick={this.onDeletePicClick}
-                                   pics={this.state.pics}/>
+                        />
                     </div>
                 </div>
+                {rows}
             </div>
         )
 

@@ -47,14 +47,12 @@ class App extends React.Component {
             if (this.httpRequest.readyState === XMLHttpRequest.DONE) {
                 if (this.httpRequest.status === 200) {
                     let resp = JSON.parse(this.httpRequest.responseText);
-                    console.log(resp)
 
                    if(resp.status == "logged in"){
                        sessionStorage.setItem('loggedIn', true);
                        sessionStorage.setItem('userId', resp.userId);
                        sessionStorage.setItem('userName', resp.userName);
                    }else{
-                       console.log("not logged in")
                        sessionStorage.removeItem('loggedIn');
                        sessionStorage.removeItem('userId');
                        sessionStorage.removeItem('userName');
