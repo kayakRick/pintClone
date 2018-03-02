@@ -13815,8 +13815,8 @@ class App extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
     }
 
     onLogOffClick() {
-        localStorage.removeItem("loggedIn");
-        localStorage.removeItem("loginName");
+        sessionStorage.removeItem("loggedIn");
+        sessionStorage.removeItem("loginName");
         this.props.router.push('/');
     }
 
@@ -27514,13 +27514,13 @@ class Deletebutton extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Compone
     }
 
     render() {
-        if (localStorage.getItem("loggedIn")) return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             "button",
             { className: "btn btn-primary", type: "button",
                 value: this.props.i, onClick: this.props.onLikeclick },
             "Likes: " + this.props.likes,
             " "
-        );else return null;
+        );
     }
 }
 
@@ -27547,7 +27547,7 @@ class MyPics extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
     constructor(props) {
         super(props);
 
-        if (!localStorage.getItem("loggedIn")) this.props.router.push('/Login');
+        if (!sessionStorage.getItem("loggedIn")) this.props.router.push('/Login');
 
         this.state = {
             pics: [],
@@ -27872,7 +27872,7 @@ class Deletebutton extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Compone
     }
 
     render() {
-        if (localStorage.getItem("loggedIn")) return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+        if (sessionStorage.getItem("loggedIn")) return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             "button",
             { className: "btn btn-primary", type: "button",
                 value: this.props.i, onClick: this.props.onDeleteclick },

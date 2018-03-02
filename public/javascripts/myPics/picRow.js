@@ -67,7 +67,7 @@ class Deletebutton extends React.Component {
     }
 
     render() {
-        if(localStorage.getItem("loggedIn"))
+        if(sessionStorage.getItem("loggedIn"))
             return(
                 <button className="btn btn-primary" type="button"
                         value={this.props.i} onClick={this.props.onDeleteclick}>Delete</button>

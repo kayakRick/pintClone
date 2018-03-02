@@ -15,7 +15,7 @@ export default class MyPics extends React.Component {
     constructor(props) {
         super(props);
 
-        if(!localStorage.getItem("loggedIn"))
+        if(!sessionStorage.getItem("loggedIn"))
             this.props.router.push('/Login');
 
         this.state = {

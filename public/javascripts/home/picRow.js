@@ -66,14 +66,11 @@ class Deletebutton extends React.Component {
     }
 
     render() {
-        if(localStorage.getItem("loggedIn"))
-            return(
-                <button className="btn btn-primary" type="button"
-                        value={this.props.i} onClick={this.props.onLikeclick}>
-                    {"Likes: " + this.props.likes} </button>
-            );
-        else
-            return null;
+        return (
+            <button className="btn btn-primary" type="button"
+                    value={this.props.i} onClick={this.props.onLikeclick}>
+                {"Likes: " + this.props.likes} </button>
+        );
     }
 }
 

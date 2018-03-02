@@ -75,8 +75,8 @@ class App extends React.Component {
     }
 
     onLogOffClick(){
-        localStorage.removeItem("loggedIn");
-        localStorage.removeItem("loginName");
+        sessionStorage.removeItem("loggedIn");
+        sessionStorage.removeItem("loginName");
         this.props.router.push('/');
     }
 
